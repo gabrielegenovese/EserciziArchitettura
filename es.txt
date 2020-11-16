@@ -1,0 +1,11 @@
+Codificare queste istruzioni
+@12
+D=M+1
+!D;JGT
+
+// @12 A-instr
+0000 0000 0000 1100
+// D = M + 1 D-instr
+1111 1101 1101 0000
+// !D;JGT
+1110 0011 1100 0001
