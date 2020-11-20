@@ -23,6 +23,12 @@ int main(int argc, char **argv)
     LISTA * head, * prec, * tmp = malloc(sizeof(LISTA));
     head = tmp;
 
+    if(argc < 2)
+    {
+        printf("Errore: inserire un argomento\n");
+        return(-1);
+    }
+
     while(argv[1][i+1] != '\0')
     {
         tmp->elem = argv[1][i];
@@ -40,11 +46,9 @@ int main(int argc, char **argv)
     do{
         printf("Scegli il carattere da eliminare (tra 0 e %d comprese): ", i);
         scanf("%d", &elim);
-    }while (elim >= i && elim < 0);
+    }while (elim >= i || elim < 0);
 
-    if(elim == 0){
-        head = head->next;
-    }
+    if(elim == 0) head = head->next;
     else
     {
         i = 0;
@@ -56,7 +60,6 @@ int main(int argc, char **argv)
             prec = tmp;
             tmp = tmp->next;
         }
-
         prec->next = tmp->next;
     }
     
