@@ -37,12 +37,25 @@ char * nome_file(char str[])
     return tmp;
 }
 
-char * getCommand(char str[64])
+char * getCommand(FILE * fasm, char str[64])
 {
     char * command = malloc(64*sizeof(char));
     char * tmp = command;
+    int i = 0, z = 0, comment = 0;
 
-    
+    while (str[i] != '\n')
+    {
+        command[z+1] = '\0';
+        if (str[i] == '/' && str[i+1] == '/')
+            return command;
+        else
+        {
+            if (str[i] != ' ') command[z] = str[i];
+            else z--;
+        }
+        z++;
+        i++;
+    }
 
     return command;
 }
@@ -71,12 +84,245 @@ int *num_to_bit(int n){
     return write;
 }
 
+void error(char *c, int riga)
+{
+    printf("Errore: controlla la sintassi di %c a riga %d\n", c, riga);
+}
+
+int isStringEqual(char * p1, char * p2, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        if(p1[i] != p2[i])
+            return 0;
+    }
+    return 1;
+}
+
+int assegnamento(int *write, char c, char *op)
+{
+
+    if (c == 'A')
+        write[10] = 1;
+    else if (c == 'D')
+        write[11] = 1;
+    else if (c == 'M')
+        write[12] = 1;
+
+    if (op[0] == '0')
+    {
+        write[4] = 1;
+        write[6] = 1;
+        write[8] = 1;
+    }
+    else if (isStringEqual(op, (char *)"1", 1))
+    {
+        for (int i = 4; i <= 9; i++)
+            write[i] = 1;
+    }
+    else if (isStringEqual(op, (char *)"-1", 2))
+    {
+        write[4] = 1;
+        write[5] = 1;
+        write[6] = 1;
+        write[8] = 1;
+    }
+    else if (isStringEqual(op, (char *)"D", 1))
+    {
+        write[6] = 1;
+        write[7] = 1;
+    }
+    else if (isStringEqual(op, (char *)"A", 1) || isStringEqual(op, (char *)"M", 1))
+    {
+        if(op[0]=='M') write[3] = 1;
+        write[4] = 1;
+        write[5] = 1;
+    }
+    else if (isStringEqual(op, (char *)"!D", 2))
+    {
+        write[6] = 1;
+        write[7] = 1; 
+        write[9] = 1;
+    }
+    else if (isStringEqual(op, (char *)"!A", 2) || isStringEqual(op, (char *)"!M", 2))
+    {
+        if(op[1]=='M') write[3] = 1;
+        write[4] = 1;
+        write[5] = 1;
+        write[9] = 1;
+    }
+    else if (isStringEqual(op, (char *)"-D", 2))
+    {
+        write[6] = 1;
+        write[7] = 1;
+        write[8] = 1;
+        write[9] = 1;
+    }
+    else if (isStringEqual(op, (char *)"-A", 2) || isStringEqual(op, (char *)"-M", 2))
+    {
+        if(op[1]=='M') write[3] = 1;
+        write[4] = 1;
+        write[5] = 1;
+        write[8] = 1;
+        write[9] = 1;
+    }
+    else if (isStringEqual(op, (char *)"D+1", 3))
+    {
+        for (int i = 5; i <= 9; i++)
+            write[i] = 1;
+    }
+    else if (isStringEqual(op, (char *)"A+1" || isStringEqual(op, (char *)"M+1")
+    {
+        if(op[0]=='M') write[3] = 1;
+        for (int i = 4; i <= 9; i++)
+            write[i] = 1;
+        write[6] = 0;
+    }
+    else if (isStringEqual(op, (char *)"D-1")
+    {
+        for (int i = 6; i <= 8; i++)
+            write[i] = 1;
+    }
+    else if (isStringEqual(op, (char *)"A-1" || isStringEqual(op, (char *)"M-1")
+    {
+        if(op[0]=='M') write[3] = 1;
+        write[4] = 1;
+        write[5] = 1;
+        write[8] = 1;
+    }
+    else if (isStringEqual(op, (char *)"D+A" || isStringEqual(op, (char *)"D+M")
+    {
+        if(op[2]=='M') write[3] = 1;
+        write[8] = 1;
+    }
+    else if (isStringEqual(op, (char *)"D-A" || isStringEqual(op, (char *)"D-M")
+    {
+        if(op[2]=='M') write[3] = 1;
+        write[5] = 1;
+        write[8] = 1;
+        write[9] = 1;
+    }
+    else if (*isStringEqual(op, (char *)"A-D" || isStringEqual(op, (char *)"M-D")
+    {
+        if(op[0]=='M') write[3] = 1;
+        for (int i = 7; i <= 9; i++)
+            write[i] = 1;
+    }
+    else if (isStringEqual(op, (char *)"D&A" || isStringEqual(op, (char *)"D&M")
+        if(op[2]=='M') write[3] = 1;
+    else if (isStringEqual(op, (char *)"D|A" || isStringEqual(op, (char *)"D|M")
+    {
+        if(op[2]=='M') write[3] = 1;
+        write[5] = 1;
+        write[7] = 1;
+        write[9] = 1;
+    }
+    else return 0;
+    
+    return 1;
+}
+
+void exec_command(char command[64], int riga, int write[16], FILE * fhack)
+{
+    if(command[0] == '@') // a-istr
+    {
+        char * numero = &command[1];
+        write = num_to_bit(atoi(numero));
+    }
+    else if (command[1] == ';') //jump
+    {   
+        write[0] = 1;
+        write[1] = 1;
+        write[2] = 1;
+        
+        char comp = command[0];
+        char *jmp = &command[2];
+        if (comp == 'A')
+        {
+            write[4] = 1;
+            write[5] = 1;
+        }
+        else if (comp == 'D')
+        {
+            write[6] = 1;
+            write[7] = 1;
+        }
+        else if (comp == 'M')
+        {
+            write[3] = 1;
+            write[4] = 1;
+            write[5] = 1;
+        }
+        else error(command, riga);
+
+        if (jmp[0] == 'J')
+        {
+            if (jmp[1] == 'G' && jmp[2] == 'T')
+                write[15] = 1;
+            else if (jmp[1] == 'E' && jmp[2] == 'Q')
+                write[14] = 1;
+            else if (jmp[1] == 'G' && jmp[2] == 'E')
+            {
+                write[14] = 1;
+                write[15] = 1;
+            }
+            else if (jmp[1] == 'L' && jmp[2] == 'T')
+            {
+                write[13] = 1;
+            }
+            else if (jmp[1] == 'N' && jmp[2] == 'E')
+            {
+                write[13] = 1;
+                write[15] = 1;
+            }
+            else if (jmp[1] == 'L' && jmp[2] == 'E')
+            {
+                write[13] = 1;
+                write[14] = 1;
+            }
+            else if (jmp[1] == 'M' && jmp[2] == 'P')
+            {
+                write[13] = 1;
+                write[14] = 1;
+                write[15] = 1;
+            }
+            else error(command, riga);
+        }
+        else error(command, riga);
+    }
+    else if (command[1] == '=' || command[2] == '=') // c-istr
+    {
+        write[0] = 1;
+        write[1] = 1;
+        write[2] = 1;
+
+        if(command[1] == '=')
+            if(assegnamento(&write[0], &command[0], &command[2])){}
+            else error(command, riga);
+        else
+        {
+            if(assegnamento(&write[0], &command[0], &command[3])){}
+            else error(command, riga);
+            if (assegnamento(&write[0], &command[1], &command[3])){}
+            else error(command, riga);
+        }
+    }
+    else if (command[0] == '(') //label
+    {
+        fprintf(fhack, "label istr");
+        //label_istr(command);
+    }
+    else if (command[0] != NULL) error(command, riga);
+
+    write_bit(fhack, write);
+}
+
 int main(int argc, char **argv)
 {
     FILE *fasm, *fhack;
     int *write = malloc(16*sizeof(int));
-    char command[64], str[64];
-    int i, comment, riga = 1;
+    char *command, str[64];
+    int riga = 1;
     
     // esce se non inserisce argomenti
     if(argc < 2)
@@ -97,69 +343,16 @@ int main(int argc, char **argv)
 
     while(fgets(str, 64, fasm) != NULL)
     {
-        
-        i = 0;
-        comment = 0;
-
-        // pulisto dal comando prima
-        for (int j = 0; command[j] != '\0'; j++)
-            command[j] = NULL;
-
-        // prendo il comando dalla riga letta
-        // elimino commenti, \n e spazi
-        while (str[i] != '\n')
-        {   
-            if (str[i] != '/' && str[i+1] != '/'){
-                if ((comment-1) && (str[i] > 32 && str[i] < 125)) command[i] = str[i];
-            }else
-            {
-                fgets(str, 64, fasm);
-                i = -1;
-                comment = 0;
-            }
-
-            i++;
-        }
-        command[i] = '\0';
-
+        command = malloc(64*sizeof(char));
+        command = getCommand(fasm, str);
         //printf("%s\n", command);
-        int length = i;
-        if(command[0] == '@') // a-istr
-        {
-            char * numero = &command[1];
-            write = num_to_bit(atoi(numero));
-            write_bit(fhack, write);
-        }
-        else if (command[1] == ';') //jump
-        {
-            // se 0;JMP salta sempre
-            write[0] = 1;
-            write[13] = 1;
-            write[14] = 1;
-            write[15] = 1;
-            write_bit(fhack, write);
-        }
-        else if (command[1] == '=' || command[2] == '=') // c-istr
-        {
-            write[0] = 1;
-            /*if(command[1] == 'D' || command[1] == 'M' || command[1] == 'A')
-            {
+        
+        exec_command(command, riga, write, fhack);
 
-            } else if(command[1] == '=')
-            {
-                //assign(command[0], &command[2]);
-            }
-            */
-        }
-        else if (command[0] == '(') //label
-        {
-            //label_istr(command);
-        }
-        else if (command[0] != NULL)
-            printf("ERRORE: controlla la sintassi di %s a riga %d\n", command, riga);            
-
+        free(command);
         riga++;
     }
+    //fprintf(fhack, "END");
     fclose(fasm);
     fclose(fhack);
     return(0);
