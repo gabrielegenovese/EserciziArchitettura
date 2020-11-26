@@ -1,0 +1,30 @@
+
+function div(x,y)
+    tmp = x
+    while (tmp > 0)
+        tmp = tmp - y
+    
+    if (tmp == 0)
+        return 0
+    tmp = tmp + y
+    return tmp // ritrno il resto
+
+function isprime(n)
+    y = n
+    x = n
+    while (y != 1)
+        y--
+        resto = div(x,y)
+        if (resto == 0)
+            return 0 // non è primo 
+    return 1
+
+main
+    i = 0
+    while (i != 20)
+        if isprime(i) == 0
+            togli i dallo stack
+        else
+            metti i nello stack
+        i++
+    return stack

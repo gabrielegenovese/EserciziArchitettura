@@ -1,0 +1,85 @@
+push constant 4
+push constant 3 
+call primi.div 2
+label end
+goto end
+
+function primi.main 0
+push constant 0
+pop local 0 // i
+label loop
+    push local 0
+    push constant 20
+    eq
+    if-goto end
+    push local 1 // resto
+    push local 0
+    call primi.isprime 1
+    push local 1
+    push constant 0
+    eq
+    if-goto elim
+    push local 0
+    push constant 1
+    add
+    goto loop
+label elim
+    pop local 0
+    goto loop
+label end
+    goto end
+
+function primi.div 0 // div(x,y)
+label loop
+    push argument 0
+    push constant 0
+    lt
+    if-goto end
+    push argument 0
+    push argument 1
+    sub
+    pop argument 0
+    goto loop
+label end
+    push argument 0
+    push constant 0
+    eq
+    if-goto notzero
+    push argument 0
+    push argument 1
+    add
+    pop argument 0
+    return
+label notzero
+    pop argument 0
+    return
+
+function primi.isprime 1
+    push argument 0 // n
+    pop local 0 // y
+    push argument 0
+    pop local 1 // x
+label loop
+    push local 0
+    push constant 1
+    eq
+    if-goto prime
+    push local 0
+    push constant 1
+    sub
+    pop local 0
+    push local 1
+    push local 0
+    call primi.div 2
+    pop local 2
+    push local 2
+    push constant 0
+    eq
+    if-goto notprime
+    goto loop
+label notprime
+    push constant 0
+    return
+label prime
+    pop argument 0
+    return
