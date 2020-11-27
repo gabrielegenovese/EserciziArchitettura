@@ -171,46 +171,46 @@ int assegnamento(int *write, char c, char *op)
         for (int i = 5; i <= 9; i++)
             write[i] = 1;
     }
-    else if (isStringEqual(op, (char *)"A+1" || isStringEqual(op, (char *)"M+1")
+    else if (isStringEqual(op, (char *)"A+1", 3) || isStringEqual(op, (char *)"M+1", 3))
     {
         if(op[0]=='M') write[3] = 1;
         for (int i = 4; i <= 9; i++)
             write[i] = 1;
         write[6] = 0;
     }
-    else if (isStringEqual(op, (char *)"D-1")
+    else if (isStringEqual(op, (char *)"D-1", 3))
     {
         for (int i = 6; i <= 8; i++)
             write[i] = 1;
     }
-    else if (isStringEqual(op, (char *)"A-1" || isStringEqual(op, (char *)"M-1")
+    else if (isStringEqual(op, (char *)"A-1", 3) || isStringEqual(op, (char *)"M-1", 3))
     {
         if(op[0]=='M') write[3] = 1;
         write[4] = 1;
         write[5] = 1;
         write[8] = 1;
     }
-    else if (isStringEqual(op, (char *)"D+A" || isStringEqual(op, (char *)"D+M")
+    else if (isStringEqual(op, (char *)"D+A", 3) || isStringEqual(op, (char *)"D+M", 3))
     {
         if(op[2]=='M') write[3] = 1;
         write[8] = 1;
     }
-    else if (isStringEqual(op, (char *)"D-A" || isStringEqual(op, (char *)"D-M")
+    else if (isStringEqual(op, (char *)"D-A", 3) || isStringEqual(op, (char *)"D-M", 3))
     {
         if(op[2]=='M') write[3] = 1;
         write[5] = 1;
         write[8] = 1;
         write[9] = 1;
     }
-    else if (*isStringEqual(op, (char *)"A-D" || isStringEqual(op, (char *)"M-D")
+    else if (isStringEqual(op, (char *)"A-D", 3) || isStringEqual(op, (char *)"M-D", 3))
     {
         if(op[0]=='M') write[3] = 1;
         for (int i = 7; i <= 9; i++)
             write[i] = 1;
     }
-    else if (isStringEqual(op, (char *)"D&A" || isStringEqual(op, (char *)"D&M")
+    else if (isStringEqual(op, (char *)"D&A", 3) || isStringEqual(op, (char *)"D&M", 3))
         if(op[2]=='M') write[3] = 1;
-    else if (isStringEqual(op, (char *)"D|A" || isStringEqual(op, (char *)"D|M")
+    else if (isStringEqual(op, (char *)"D|A", 3) || isStringEqual(op, (char *)"D|M", 3))
     {
         if(op[2]=='M') write[3] = 1;
         write[5] = 1;
@@ -267,9 +267,7 @@ void exec_command(char command[64], int riga, int write[16], FILE * fhack)
                 write[15] = 1;
             }
             else if (jmp[1] == 'L' && jmp[2] == 'T')
-            {
                 write[13] = 1;
-            }
             else if (jmp[1] == 'N' && jmp[2] == 'E')
             {
                 write[13] = 1;
@@ -297,13 +295,13 @@ void exec_command(char command[64], int riga, int write[16], FILE * fhack)
         write[2] = 1;
 
         if(command[1] == '=')
-            if(assegnamento(&write[0], &command[0], &command[2])){}
+            if(assegnamento(&write[0], command[0], &command[2])){}
             else error(command, riga);
-        else
+        else if(command[2] == '=')
         {
-            if(assegnamento(&write[0], &command[0], &command[3])){}
+            if(assegnamento(&write[0], command[0], &command[3])){}
             else error(command, riga);
-            if (assegnamento(&write[0], &command[1], &command[3])){}
+            if (assegnamento(&write[0], command[1], &command[3])){}
             else error(command, riga);
         }
     }
@@ -345,7 +343,7 @@ int main(int argc, char **argv)
     {
         command = malloc(64*sizeof(char));
         command = getCommand(fasm, str);
-        //printf("%s\n", command);
+        printf("%s\n", command);
         
         exec_command(command, riga, write, fhack);
 
