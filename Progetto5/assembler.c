@@ -89,13 +89,46 @@ void error(char *c, int riga)
     printf("Errore: controlla la sintassi di %c a riga %d\n", c, riga);
 }
 
-int isStringEqual(char * p1, char * p2, int size)
+int isStringEqual(char * p1, char * p2)
 {
-    for (int i = 0; i < size; i++)
+    //printf("Confronto\n");
+    //printf("%s\t", p1 );
+    //printf("%s\n", p2);
+
+    int length1 = 0, i = 0;
+    char * tmp = p1;
+    while (tmp[i] != '\0')
+    {
+        length1++;
+        i++;
+    }
+
+    int length2 = 0;
+    i = 0;
+    tmp = p2;
+    while (tmp[i] != '\0')
+    {
+        length2++;
+        i++;
+    }
+    length1--;
+    if (length1 != length2)
+    {
+        //printf("%d %d\n", length1, length2);
+        return 0;
+    }
+    
+
+    for (int i = 0; i < length1; i++)
     {
         if(p1[i] != p2[i])
+        {
+            //printf("Diverso!\n");
             return 0;
+        }
+        //printf("Controllo %c %c");
     }
+    //printf("Uguale!\n");
     return 1;
 }
 
@@ -115,50 +148,50 @@ int assegnamento(int *write, char c, char *op)
         write[6] = 1;
         write[8] = 1;
     }
-    else if (isStringEqual(op, (char *)"1", 1))
+    else if (isStringEqual(op, (char *)"1"))
     {
         for (int i = 4; i <= 9; i++)
             write[i] = 1;
     }
-    else if (isStringEqual(op, (char *)"-1", 2))
+    else if (isStringEqual(op, (char *)"-1"))
     {
         write[4] = 1;
         write[5] = 1;
         write[6] = 1;
         write[8] = 1;
     }
-    else if (isStringEqual(op, (char *)"D", 1))
+    else if (isStringEqual(op, (char *)"D"))
     {
         write[6] = 1;
         write[7] = 1;
     }
-    else if (isStringEqual(op, (char *)"A", 1) || isStringEqual(op, (char *)"M", 1))
+    else if (isStringEqual(op, (char *)"A") || isStringEqual(op, (char *)"M"))
     {
         if(op[0]=='M') write[3] = 1;
         write[4] = 1;
         write[5] = 1;
     }
-    else if (isStringEqual(op, (char *)"!D", 2))
+    else if (isStringEqual(op, (char *)"!D"))
     {
         write[6] = 1;
         write[7] = 1; 
         write[9] = 1;
     }
-    else if (isStringEqual(op, (char *)"!A", 2) || isStringEqual(op, (char *)"!M", 2))
+    else if (isStringEqual(op, (char *)"!A") || isStringEqual(op, (char *)"!M"))
     {
         if(op[1]=='M') write[3] = 1;
         write[4] = 1;
         write[5] = 1;
         write[9] = 1;
     }
-    else if (isStringEqual(op, (char *)"-D", 2))
+    else if (isStringEqual(op, (char *)"-D"))
     {
         write[6] = 1;
         write[7] = 1;
         write[8] = 1;
         write[9] = 1;
     }
-    else if (isStringEqual(op, (char *)"-A", 2) || isStringEqual(op, (char *)"-M", 2))
+    else if (isStringEqual(op, (char *)"-A") || isStringEqual(op, (char *)"-M"))
     {
         if(op[1]=='M') write[3] = 1;
         write[4] = 1;
@@ -166,51 +199,51 @@ int assegnamento(int *write, char c, char *op)
         write[8] = 1;
         write[9] = 1;
     }
-    else if (isStringEqual(op, (char *)"D+1", 3))
+    else if (isStringEqual(op, (char *)"D+1"))
     {
         for (int i = 5; i <= 9; i++)
             write[i] = 1;
     }
-    else if (isStringEqual(op, (char *)"A+1", 3) || isStringEqual(op, (char *)"M+1", 3))
+    else if (isStringEqual(op, (char *)"A+1") || isStringEqual(op, (char *)"M+1"))
     {
         if(op[0]=='M') write[3] = 1;
         for (int i = 4; i <= 9; i++)
             write[i] = 1;
         write[6] = 0;
     }
-    else if (isStringEqual(op, (char *)"D-1", 3))
+    else if (isStringEqual(op, (char *)"D-1"))
     {
         for (int i = 6; i <= 8; i++)
             write[i] = 1;
     }
-    else if (isStringEqual(op, (char *)"A-1", 3) || isStringEqual(op, (char *)"M-1", 3))
+    else if (isStringEqual(op, (char *)"A-1") || isStringEqual(op, (char *)"M-1"))
     {
         if(op[0]=='M') write[3] = 1;
         write[4] = 1;
         write[5] = 1;
         write[8] = 1;
     }
-    else if (isStringEqual(op, (char *)"D+A", 3) || isStringEqual(op, (char *)"D+M", 3))
+    else if (isStringEqual(op, (char *)"D+A") || isStringEqual(op, (char *)"D+M"))
     {
         if(op[2]=='M') write[3] = 1;
         write[8] = 1;
     }
-    else if (isStringEqual(op, (char *)"D-A", 3) || isStringEqual(op, (char *)"D-M", 3))
+    else if (isStringEqual(op, (char *)"D-A") || isStringEqual(op, (char *)"D-M"))
     {
         if(op[2]=='M') write[3] = 1;
         write[5] = 1;
         write[8] = 1;
         write[9] = 1;
     }
-    else if (isStringEqual(op, (char *)"A-D", 3) || isStringEqual(op, (char *)"M-D", 3))
+    else if (isStringEqual(op, (char *)"A-D") || isStringEqual(op, (char *)"M-D"))
     {
         if(op[0]=='M') write[3] = 1;
         for (int i = 7; i <= 9; i++)
             write[i] = 1;
     }
-    else if (isStringEqual(op, (char *)"D&A", 3) || isStringEqual(op, (char *)"D&M", 3))
+    else if (isStringEqual(op, (char *)"D&A") || isStringEqual(op, (char *)"D&M"))
         if(op[2]=='M') write[3] = 1;
-    else if (isStringEqual(op, (char *)"D|A", 3) || isStringEqual(op, (char *)"D|M", 3))
+    else if (isStringEqual(op, (char *)"D|A") || isStringEqual(op, (char *)"D|M"))
     {
         if(op[2]=='M') write[3] = 1;
         write[5] = 1;
@@ -253,6 +286,12 @@ void exec_command(char command[64], int riga, int write[16], FILE * fhack)
             write[4] = 1;
             write[5] = 1;
         }
+        else if (comp == '0')
+        {
+            write[4] = 1;
+            write[6] = 1;
+            write[8] = 1;
+        }
         else error(command, riga);
 
         if (jmp[0] == 'J')
@@ -294,14 +333,20 @@ void exec_command(char command[64], int riga, int write[16], FILE * fhack)
         write[1] = 1;
         write[2] = 1;
 
+        char assegna = command[0];
+        // es M=D+1
+        char * op = &command[2]; // se metto 2 dà errore
+
         if(command[1] == '=')
-            if(assegnamento(&write[0], command[0], &command[2])){}
+            if(assegnamento(&write[0], assegna, op)){}
             else error(command, riga);
         else if(command[2] == '=')
         {
-            if(assegnamento(&write[0], command[0], &command[3])){}
+            op = &command[3];
+            if(assegnamento(&write[0], assegna, op)){}
             else error(command, riga);
-            if (assegnamento(&write[0], command[1], &command[3])){}
+            assegna = command[1];
+            if (assegnamento(&write[0], assegna, op)){}
             else error(command, riga);
         }
     }
@@ -318,7 +363,7 @@ void exec_command(char command[64], int riga, int write[16], FILE * fhack)
 int main(int argc, char **argv)
 {
     FILE *fasm, *fhack;
-    int *write = malloc(16*sizeof(int));
+    int *write;
     char *command, str[64];
     int riga = 1;
     
@@ -341,12 +386,13 @@ int main(int argc, char **argv)
 
     while(fgets(str, 64, fasm) != NULL)
     {
+        write = malloc(16*sizeof(int));
         command = malloc(64*sizeof(char));
         command = getCommand(fasm, str);
-        printf("%s\n", command);
+        //printf("%s\n", command);
         
         exec_command(command, riga, write, fhack);
-
+        free(write);
         free(command);
         riga++;
     }

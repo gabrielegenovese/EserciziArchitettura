@@ -5,15 +5,15 @@
 
 // Symbol-less version of the Rect.asm program.
 
-@R0
+@0
 D=M
-@R23
+@23
 D;JLE
 @16
 M=D
-@A16384
+@8
 D=A
-@ammammt
+@9
 M=D
 @17
 A=M
