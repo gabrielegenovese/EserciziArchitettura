@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct variabile{
+typedef struct variabile
+{
     char nome[20];
     int address;
     int val;
 } VAR;
 
-char * nome_file(char str[])
+char *nome_file(char str[])
 {
     int i = 0, asmfile = 0;
     while (str[i+3] != '\0') 
@@ -37,7 +38,7 @@ char * nome_file(char str[])
     return tmp;
 }
 
-char * getCommand(FILE * fasm, char str[64])
+char *getCommand(FILE * fasm, char str[64])
 {
     char * command = malloc(64*sizeof(char));
     char * tmp = command;
@@ -71,7 +72,8 @@ int write_bit(FILE * fhack, int write[16])
     fprintf(fhack, "\n");
 }
 
-int *num_to_bit(int n){
+int *num_to_bit(int n)
+{
     int *write = malloc(16*sizeof(int));
     int resto = 0, i = 15;
     while (n != 0)
@@ -91,9 +93,6 @@ void error(char *c, int riga)
 
 int isStringEqual(char * p1, char * p2)
 {
-    //printf("Confronto\n");
-    //printf("%s\t", p1 );
-    //printf("%s\n", p2);
 
     int length1 = 0, i = 0;
     char * tmp = p1;
@@ -113,22 +112,14 @@ int isStringEqual(char * p1, char * p2)
     }
     length1--;
     if (length1 != length2)
-    {
-        //printf("%d %d\n", length1, length2);
         return 0;
-    }
     
 
     for (int i = 0; i < length1; i++)
     {
         if(p1[i] != p2[i])
-        {
-            //printf("Diverso!\n");
             return 0;
-        }
-        //printf("Controllo %c %c");
     }
-    //printf("Uguale!\n");
     return 1;
 }
 
@@ -242,7 +233,9 @@ int assegnamento(int *write, char c, char *op)
             write[i] = 1;
     }
     else if (isStringEqual(op, (char *)"D&A") || isStringEqual(op, (char *)"D&M"))
+    {
         if(op[2]=='M') write[3] = 1;
+    }
     else if (isStringEqual(op, (char *)"D|A") || isStringEqual(op, (char *)"D|M"))
     {
         if(op[2]=='M') write[3] = 1;
@@ -251,7 +244,7 @@ int assegnamento(int *write, char c, char *op)
         write[9] = 1;
     }
     else return 0;
-    
+
     return 1;
 }
 
@@ -389,14 +382,12 @@ int main(int argc, char **argv)
         write = malloc(16*sizeof(int));
         command = malloc(64*sizeof(char));
         command = getCommand(fasm, str);
-        //printf("%s\n", command);
-        
-        exec_command(command, riga, write, fhack);
+        if (command[0] != NULL && command[0] != 13)
+            exec_command(command, riga, write, fhack);
         free(write);
         free(command);
         riga++;
     }
-    //fprintf(fhack, "END");
     fclose(fasm);
     fclose(fhack);
     return(0);
