@@ -1,3 +1,5 @@
 M = D +1
-D=A
-0;JMP
+@SCREEN
+@CIAO
+D = D|M
+A = M+1

@@ -3,10 +3,10 @@
 
 typedef struct variabile
 {
-    char nome[20];
-    int address;
+    char *nome;
     int val;
-} VAR;
+    struct variabile *next;
+} *VAR;
 
 char *nome_file(char str[])
 {
@@ -38,7 +38,7 @@ char *nome_file(char str[])
     return tmp;
 }
 
-char *getCommand(FILE * fasm, char str[64])
+char *getCommand(char str[64])
 {
     char * command = malloc(64*sizeof(char));
     char * tmp = command;
@@ -46,7 +46,6 @@ char *getCommand(FILE * fasm, char str[64])
 
     while (str[i] != '\n')
     {
-        command[z+1] = '\0';
         if (str[i] == '/' && str[i+1] == '/')
             return command;
         else
@@ -57,7 +56,7 @@ char *getCommand(FILE * fasm, char str[64])
         z++;
         i++;
     }
-
+    command[z-1] = '\0';
     return command;
 }
 
@@ -93,7 +92,6 @@ void error(char *c, int riga)
 
 int isStringEqual(char * p1, char * p2)
 {
-
     int length1 = 0, i = 0;
     char * tmp = p1;
     while (tmp[i] != '\0')
@@ -110,10 +108,9 @@ int isStringEqual(char * p1, char * p2)
         length2++;
         i++;
     }
-    length1--;
+
     if (length1 != length2)
         return 0;
-    
 
     for (int i = 0; i < length1; i++)
     {
@@ -248,12 +245,60 @@ int assegnamento(int *write, char c, char *op)
     return 1;
 }
 
-void exec_command(char command[64], int riga, int write[16], FILE * fhack)
+void exec_command(char *command, int riga, int write[16], FILE * fhack, VAR var)
 {
-    if(command[0] == '@') // a-istr
+    int do_write = 1;
+    if (command[0] == '@') // a-istr
     {
-        char * numero = &command[1];
-        write = num_to_bit(atoi(numero));
+        char * numero = &command[1]; // es. @17
+        if (command[1] == 'R')
+            numero = &command[2];  // es. @R1
+
+        int num = atoi(numero);
+
+        if (num == 0 && numero[0] != '0')
+        {
+            while (var != NULL)
+            {
+                if(isStringEqual(var->nome, numero))
+                {
+                    num = var->val;
+                    break;
+                }
+                var = var->next;
+            }
+        }
+
+        if (isStringEqual(numero, (char *)"SCREEN"))
+        {
+            num = 16384;
+        }
+        else if (isStringEqual(numero, (char *)"KBD"))
+        {
+            num = 24576;
+        }
+        else if (isStringEqual(numero, (char *)"SP"))
+        {
+            num = 0;
+        }
+        else if (isStringEqual(numero, (char *)"LCL"))
+        {
+            num = 1;
+        }
+        else if (isStringEqual(numero, (char *)"ARG"))
+        {
+            num = 2;
+        }
+        else if (isStringEqual(numero, (char *)"THIS"))
+        {
+            num = 3;
+        }
+        else if (isStringEqual(numero, (char *)"THAT"))
+        {
+            num = 4;
+        }
+
+        write = num_to_bit(num);
     }
     else if (command[1] == ';') //jump
     {   
@@ -327,8 +372,7 @@ void exec_command(char command[64], int riga, int write[16], FILE * fhack)
         write[2] = 1;
 
         char assegna = command[0];
-        // es M=D+1
-        char * op = &command[2]; // se metto 2 dà errore
+        char * op = &command[2];
 
         if(command[1] == '=')
             if(assegnamento(&write[0], assegna, op)){}
@@ -345,12 +389,35 @@ void exec_command(char command[64], int riga, int write[16], FILE * fhack)
     }
     else if (command[0] == '(') //label
     {
-        fprintf(fhack, "label istr");
-        //label_istr(command);
+        do_write = 0;
     }
     else if (command[0] != NULL) error(command, riga);
 
-    write_bit(fhack, write);
+    if(do_write) write_bit(fhack, write);
+    do_write = 1;
+}
+
+VAR newVariable(VAR head, char * name, int val)
+{
+    VAR * tmp = head;
+    if(head == NULL)
+    {
+        head = malloc(sizeof(VAR));
+        head->nome = name;
+        head->val = val;
+        head->next = NULL;
+        return head;
+    }
+    while (head->next != NULL)
+    {
+        head = head->next;
+    }
+
+    head->next = malloc(sizeof(VAR));
+    head->next->nome = name;
+    head->next->val = val;
+    head->next->next = NULL;
+    return tmp;
 }
 
 int main(int argc, char **argv)
@@ -358,7 +425,8 @@ int main(int argc, char **argv)
     FILE *fasm, *fhack;
     int *write;
     char *command, str[64];
-    int riga = 1;
+    VAR variables = NULL;
+    int riga = 0, n_val = 16;
     
     // esce se non inserisce argomenti
     if(argc < 2)
@@ -377,17 +445,47 @@ int main(int argc, char **argv)
     }
     fhack = fopen(nomefile, "w");
 
+    // inizializzo le variabili
+    while (fgets(str, 64, fasm) != NULL)
+    {
+        command = malloc(64*sizeof(char));
+        command = getCommand(str);
+        if (command[0] != NULL && command[0] != 13)
+        {
+            if(command[0] == '@')
+            {
+                char * var = &command[1];
+                if (var[0] != '0' && !atoi(&command[2]) && var[1] != '0' && !atoi(var) && !isStringEqual(var, (char *)"SCREEN") && !isStringEqual(var, (char *)"KBD") && !isStringEqual(var, (char *)"SP") && !isStringEqual(var, (char *)"ARG") && !isStringEqual(var, (char *)"LCL") && !isStringEqual(var, (char *)"THIS") && !isStringEqual(var, (char *)"THAT"))
+                {
+                    variables = newVariable(variables, var, n_val);
+                    n_val++;
+                }
+            }
+            if(command[0] == '(')
+            {
+                // inizializza come variabile la label
+            }
+            riga++;
+        }
+    }
+
+    riga = 1;
+    fasm = fopen(argv[1], "r");
+
     while(fgets(str, 64, fasm) != NULL)
     {
         write = malloc(16*sizeof(int));
         command = malloc(64*sizeof(char));
-        command = getCommand(fasm, str);
+        command = getCommand(str);
+        
         if (command[0] != NULL && command[0] != 13)
-            exec_command(command, riga, write, fhack);
+            exec_command(command, riga, write, fhack, variables);
+
         free(write);
         free(command);
         riga++;
     }
+    free(variables);
     fclose(fasm);
     fclose(fhack);
     return(0);
