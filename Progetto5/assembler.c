@@ -38,9 +38,9 @@ char *nome_file(char str[])
     return tmp;
 }
 
-char *getCommand(char str[64])
+char *getCommand(char str[128])
 {
-    char * command = malloc(64*sizeof(char));
+    char * command = malloc(128*sizeof(char));
     char * tmp = command;
     int i = 0, z = 0, comment = 0;
 
@@ -375,8 +375,10 @@ void exec_command(char *command, int riga, int write[16], FILE * fhack, VAR var)
         char * op = &command[2];
 
         if(command[1] == '=')
+        {
             if(assegnamento(&write[0], assegna, op)){}
             else error(command, riga);
+        }
         else if(command[2] == '=')
         {
             op = &command[3];
@@ -394,7 +396,6 @@ void exec_command(char *command, int riga, int write[16], FILE * fhack, VAR var)
     else if (command[0] != NULL) error(command, riga);
 
     if(do_write) write_bit(fhack, write);
-    do_write = 1;
 }
 
 VAR newVariable(VAR head, char * name, int val)
@@ -424,9 +425,9 @@ int main(int argc, char **argv)
 {
     FILE *fasm, *fhack;
     int *write;
-    char *command, str[64];
+    char *command, str[128];
     VAR variables = NULL;
-    int riga = 0, n_val = 16;
+    int riga = 1, n_val = 16;
     
     // esce se non inserisce argomenti
     if(argc < 2)
@@ -445,37 +446,71 @@ int main(int argc, char **argv)
     }
     fhack = fopen(nomefile, "w");
 
-    // inizializzo le variabili
-    while (fgets(str, 64, fasm) != NULL)
+    // inizializzo le label
+    while (fgets(str, 128, fasm) != NULL)
     {
-        command = malloc(64*sizeof(char));
+        command = malloc(128*sizeof(char));
+        command = getCommand(str);
+        if(command[0] == '(')
+        {
+            int length1 = 0, i = 0;
+            char * tmp = malloc(20*sizeof(char));
+            tmp = &command[1];
+            while (tmp[i] != '\0')
+                i++;
+
+            if(tmp[i-1] == ')')
+            {
+                tmp[i-1] = '\0';
+                variables = newVariable(variables, &tmp[1], riga-1);
+            }
+            else error(command, riga);
+        }
+        if(command[0] == '0' || command[0] == 'A' || command[0] == 'M' || command[0] == 'D' || command[0] == '@')
+            riga++;
+        
+        free(command);
+    }
+    
+    fclose(fasm);
+    fasm = fopen(argv[1], "r");
+    
+    // inizializzo le variabili
+    while (fgets(str, 128, fasm) != NULL)
+    {
+        command = malloc(128*sizeof(char));
         command = getCommand(str);
         if (command[0] != NULL && command[0] != 13)
         {
             if(command[0] == '@')
             {
                 char * var = &command[1];
-                if (var[0] != '0' && !atoi(&command[2]) && var[1] != '0' && !atoi(var) && !isStringEqual(var, (char *)"SCREEN") && !isStringEqual(var, (char *)"KBD") && !isStringEqual(var, (char *)"SP") && !isStringEqual(var, (char *)"ARG") && !isStringEqual(var, (char *)"LCL") && !isStringEqual(var, (char *)"THIS") && !isStringEqual(var, (char *)"THAT"))
+                VAR tmp = variables;
+                int to_store = 1;
+                while (tmp != NULL)
+                {
+                    if(isStringEqual(var, tmp->nome))
+                        to_store = 0;
+                    tmp = tmp->next;
+                }
+                if (to_store && var[0] != '0' && !atoi(&command[2]) && var[1] != '0' && !atoi(var) && !isStringEqual(var, (char *)"SCREEN") && !isStringEqual(var, (char *)"KBD") && !isStringEqual(var, (char *)"SP") && !isStringEqual(var, (char *)"ARG") && !isStringEqual(var, (char *)"LCL") && !isStringEqual(var, (char *)"THIS") && !isStringEqual(var, (char *)"THAT"))
                 {
                     variables = newVariable(variables, var, n_val);
                     n_val++;
                 }
+                
             }
-            if(command[0] == '(')
-            {
-                // inizializza come variabile la label
-            }
-            riga++;
         }
+        free(command);
     }
 
     riga = 1;
     fasm = fopen(argv[1], "r");
 
-    while(fgets(str, 64, fasm) != NULL)
+    while(fgets(str, 128, fasm) != NULL)
     {
         write = malloc(16*sizeof(int));
-        command = malloc(64*sizeof(char));
+        command = malloc(128*sizeof(char));
         command = getCommand(str);
         
         if (command[0] != NULL && command[0] != 13)

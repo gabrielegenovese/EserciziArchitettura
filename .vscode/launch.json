@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "args": ["/home/geno/Desktop/Università/Architettura/Esercizi/Progetto5/Add.asm"],
+            "args": ["/home/geno/Desktop/Università/Architettura/Esercizi/Progetto5/Max.asm"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
