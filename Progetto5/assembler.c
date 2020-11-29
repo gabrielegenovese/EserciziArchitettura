@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+//#include "funz.h"
 
-typedef struct variabile
-{
+typedef struct variabile{
     char *nome;
     int val;
     struct variabile *next;
@@ -40,9 +41,8 @@ char *nome_file(char str[])
 
 char *getCommand(char str[128])
 {
-    char * command = malloc(128*sizeof(char));
-    char * tmp = command;
-    int i = 0, z = 0, comment = 0;
+    char * command = malloc(50*sizeof(char));
+    int i = 0, z = 0;
 
     while (str[i] != '\n')
     {
@@ -60,14 +60,10 @@ char *getCommand(char str[128])
     return command;
 }
 
-int write_bit(FILE * fhack, int write[16])
+void write_bit(FILE * fhack, int write[16])
 {
-    int i = 0;
-    while(i != 16)
-    {
+    for (int i = 0; i < 16; i++)
         fprintf(fhack, "%d", write[i]);
-        i++;
-    }
     fprintf(fhack, "\n");
 }
 
@@ -122,7 +118,6 @@ int isStringEqual(char * p1, char * p2)
 
 int assegnamento(int *write, char c, char *op)
 {
-
     if (c == 'A')
         write[10] = 1;
     else if (c == 'D')
@@ -251,7 +246,7 @@ void exec_command(char *command, int riga, int write[16], FILE * fhack, VAR var)
     if (command[0] == '@') // a-istr
     {
         char * numero = &command[1]; // es. @17
-        if (command[1] == 'R')
+        if (command[1] == 'R' && (command[2] == '0' || (command[2] == '1') || (command[2] == '2') || (command[2] == '3') || (command[2] == '4') || (command[2] == '5') || (command[2] == '6') || (command[2] == '7') || (command[2] == '8') || (command[2] == '9')))
             numero = &command[2];  // es. @R1
 
         int num = atoi(numero);
@@ -302,6 +297,7 @@ void exec_command(char *command, int riga, int write[16], FILE * fhack, VAR var)
     }
     else if (command[1] == ';') //jump
     {   
+        write = malloc(16*sizeof(int));
         write[0] = 1;
         write[1] = 1;
         write[2] = 1;
@@ -367,6 +363,8 @@ void exec_command(char *command, int riga, int write[16], FILE * fhack, VAR var)
     }
     else if (command[1] == '=' || command[2] == '=') // c-istr
     {
+        write = malloc(16*sizeof(int));
+        
         write[0] = 1;
         write[1] = 1;
         write[2] = 1;
@@ -376,16 +374,16 @@ void exec_command(char *command, int riga, int write[16], FILE * fhack, VAR var)
 
         if(command[1] == '=')
         {
-            if(assegnamento(&write[0], assegna, op)){}
+            if(assegnamento(write, assegna, op)){}
             else error(command, riga);
         }
         else if(command[2] == '=')
         {
             op = &command[3];
-            if(assegnamento(&write[0], assegna, op)){}
+            if(assegnamento(write, assegna, op)){}
             else error(command, riga);
             assegna = command[1];
-            if (assegnamento(&write[0], assegna, op)){}
+            if (assegnamento(write, assegna, op)){}
             else error(command, riga);
         }
     }
@@ -404,7 +402,8 @@ VAR newVariable(VAR head, char * name, int val)
     if(head == NULL)
     {
         head = malloc(sizeof(VAR));
-        head->nome = name;
+        head->nome = malloc(50*sizeof(char));
+        strcpy(head->nome, name);
         head->val = val;
         head->next = NULL;
         return head;
@@ -415,54 +414,32 @@ VAR newVariable(VAR head, char * name, int val)
     }
 
     head->next = malloc(sizeof(VAR));
-    head->next->nome = name;
+    head->next->nome = malloc(50*sizeof(char));
+    strcpy(head->next->nome, name);
     head->next->val = val;
     head->next->next = NULL;
     return tmp;
 }
 
-int main(int argc, char **argv)
+VAR getLabel(VAR variables, FILE * fasm)
 {
-    FILE *fasm, *fhack;
-    int *write;
-    char *command, str[128];
-    VAR variables = NULL;
-    int riga = 1, n_val = 16;
+    int riga = 1;
+    char * command, str[128];
     
-    // esce se non inserisce argomenti
-    if(argc < 2)
-    {
-        printf("Errore: inserire un argomento\n");
-        return(-1);
-    }
-
-    fasm = fopen(argv[1], "r");
-    char * nomefile = nome_file(argv[1]);
-    // finisce il programma se l'argomento inserito non è valido
-    if(nomefile == NULL)
-    {
-        printf("Errore: argomento non valido\n");
-        return(0);
-    }
-    fhack = fopen(nomefile, "w");
-
-    // inizializzo le label
     while (fgets(str, 128, fasm) != NULL)
     {
-        command = malloc(128*sizeof(char));
         command = getCommand(str);
         if(command[0] == '(')
         {
             int length1 = 0, i = 0;
-            char * tmp = malloc(20*sizeof(char));
-            tmp = &command[1];
+            char * tmp = &command[1];
             while (tmp[i] != '\0')
                 i++;
 
             if(tmp[i-1] == ')')
             {
                 tmp[i-1] = '\0';
-                variables = newVariable(variables, &tmp[1], riga-1);
+                variables = newVariable(variables, &tmp[0], riga-1);
             }
             else error(command, riga);
         }
@@ -471,14 +448,18 @@ int main(int argc, char **argv)
         
         free(command);
     }
-    
+
     fclose(fasm);
-    fasm = fopen(argv[1], "r");
+    return variables;
+}
+
+VAR getVar(VAR variables, FILE * fasm)
+{
+    int n_val = 16;
+    char * command, str[128];
     
-    // inizializzo le variabili
     while (fgets(str, 128, fasm) != NULL)
     {
-        command = malloc(128*sizeof(char));
         command = getCommand(str);
         if (command[0] != NULL && command[0] != 13)
         {
@@ -504,19 +485,49 @@ int main(int argc, char **argv)
         free(command);
     }
 
-    riga = 1;
+    fclose(fasm);
+    return variables;
+}
+
+int main(int argc, char **argv)
+{
+    FILE *fasm, *fhack;
+    int write[16];
+    char *command, str[128];
+    VAR variables = NULL;
+    int riga = 1;
+    
+    // esce se non inserisce argomenti
+    if(argc < 2)
+    {
+        printf("Errore: inserire un argomento\n");
+        return(-1);
+    }
+
+    fasm = fopen(argv[1], "r");
+    char * nomefile = nome_file(argv[1]);
+    // finisce il programma se l'argomento inserito non è valido
+    if(nomefile == NULL)
+    {
+        printf("Errore: argomento non valido\n");
+        return(0);
+    }
+    fhack = fopen(nomefile, "w");
+
+    variables = getLabel(variables, fasm);
+
+    fasm = fopen(argv[1], "r");
+    variables = getVar(variables, fasm);
+
     fasm = fopen(argv[1], "r");
 
     while(fgets(str, 128, fasm) != NULL)
     {
-        write = malloc(16*sizeof(int));
-        command = malloc(128*sizeof(char));
         command = getCommand(str);
         
         if (command[0] != NULL && command[0] != 13)
             exec_command(command, riga, write, fhack, variables);
 
-        free(write);
         free(command);
         riga++;
     }
