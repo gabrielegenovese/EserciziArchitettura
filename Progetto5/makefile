@@ -1,8 +1,11 @@
-assembler: assembler.o
-	gcc -o assembler assembler.o
+assembler: assembler.o funz.o
+	gcc -o assembler assembler.o funz.o
 
-assembler.o: assembler.c
+assembler.o: assembler.c funz.h
 	gcc -c assembler.c
 
+funz.o: funz.c funz.h
+	gcc -c funz.c
+	
 clean:
-	rm *.o assembler
+	rm *.o
