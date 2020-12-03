@@ -47,7 +47,10 @@ char *getCommand(char str[128])
     while (str[i] != '\n')
     {
         if (str[i] == '/' && str[i+1] == '/')
+        {
+            command[z] = '\0';
             return command;
+        }
         else
         {
             if (str[i] != ' ') command[z] = str[i];
@@ -493,7 +496,7 @@ int main(int argc, char **argv)
 {
     FILE *fasm, *fhack;
     int write[16];
-    char *command, str[128];
+    char *command = NULL, str[128];
     VAR variables = NULL;
     int riga = 1;
     
@@ -525,7 +528,7 @@ int main(int argc, char **argv)
     {
         command = getCommand(str);
         
-        if (command[0] != NULL && command[0] != 13)
+        if (command[0] != NULL && command[0] != 13 && command[0] != '\0')
             exec_command(command, riga, write, fhack, variables);
 
         free(command);

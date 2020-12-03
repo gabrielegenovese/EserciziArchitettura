@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "args": ["/home/geno/Desktop/Università/Architettura/Esercizi/Progetto5/Pong.asm"],
+            "args": ["/home/geno/Desktop/Università/Architettura/Esercizi/Progetto5/Add.asm"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

@@ -6,14 +6,14 @@
 // Symbol-less version of the Rect.asm program.
 
 @0
-D= M
-@23 
-            D;JLE
+D=M
+@23
+D;JLE
 @16
 M=D
-@8
+@16384
 D=A
-@9
+@17
 M=D
 @17
 A=M
