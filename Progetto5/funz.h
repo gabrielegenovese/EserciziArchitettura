@@ -10,6 +10,7 @@ char *nome_file(char str[]);
 char *getCommand(char str[128]);
 void write_bit(FILE * fhack, int write[16]);
 int *num_to_bit(int n);
+int atoi_custom(char * num);
 void error(char *c, int riga);
 int isStringEqual(char * p1, char * p2);
 int assegnamento(int *write, char c, char *op);

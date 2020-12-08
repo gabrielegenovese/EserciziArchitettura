@@ -78,9 +78,33 @@ int *num_to_bit(int n)
     return write;
 }
 
+int pow_custom(int n, int e)
+{
+    int r = 1;
+    
+    while(e != 0)
+    {
+        r *= n;
+        e--;
+    }
+    return r;
+}
+
+int atoi_custom(char * num)
+{
+    int numero = 0;
+    while(num[0] != '\0')
+    {
+        if(((int)(num[0])-48) < 0 || ((int)(num[0])-48) > 9) return 0;
+        numero += ((int)(num[0])-48) * (pow_custom(10,(strlen(num)-1)));
+        num++;
+    }
+    return numero;
+}
+
 void error(char *c, int riga)
 {
-    printf("Errore: controlla la sintassi di %c a riga %d\n", c, riga);
+    printf("Errore: controlla la sintassi di %s a riga %d\n", c, riga);
 }
 
 int isStringEqual(char * p1, char * p2)
@@ -246,8 +270,8 @@ void exec_command(char *command, int riga, int write[16], FILE * fhack, VAR var)
         if (command[1] == 'R' && (command[2] == '0' || (command[2] == '1') || (command[2] == '2') || (command[2] == '3') || (command[2] == '4') || (command[2] == '5') || (command[2] == '6') || (command[2] == '7') || (command[2] == '8') || (command[2] == '9')))
             numero = &command[2];  // es. @R1
 
-        int num = atoi(numero);
-
+        int num = atoi_custom(numero);
+ 
         if (num == 0 && numero[0] != '0')
         {
             while (var != NULL)
@@ -471,7 +495,7 @@ VAR getVar(VAR variables, FILE * fasm)
                         to_store = 0;
                     tmp = tmp->next;
                 }
-                if (to_store && var[0] != '0' && !atoi(&command[2]) && var[1] != '0' && !atoi(var) && !isStringEqual(var, (char *)"SCREEN") && !isStringEqual(var, (char *)"KBD") && !isStringEqual(var, (char *)"SP") && !isStringEqual(var, (char *)"ARG") && !isStringEqual(var, (char *)"LCL") && !isStringEqual(var, (char *)"THIS") && !isStringEqual(var, (char *)"THAT"))
+                if (to_store && var[0] != '0' && !atoi_custom(&command[2]) && var[1] != '0' && !atoi_custom(var) && !isStringEqual(var, (char *)"SCREEN") && !isStringEqual(var, (char *)"KBD") && !isStringEqual(var, (char *)"SP") && !isStringEqual(var, (char *)"ARG") && !isStringEqual(var, (char *)"LCL") && !isStringEqual(var, (char *)"THIS") && !isStringEqual(var, (char *)"THAT"))
                 {
                     variables = newVariable(variables, var, n_val);
                     n_val++;
