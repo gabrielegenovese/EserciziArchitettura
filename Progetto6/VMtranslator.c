@@ -74,13 +74,23 @@ void writeBootstrap(FILE *fasm)
     fprintf(fasm, "M=D\n");
 }
 
-void incStack(FILE *fasm)
+void increseStack(FILE *fasm)
 {
     fprintf(fasm, "@SP\n");
     fprintf(fasm, "A=M\n");
     fprintf(fasm, "M=D\n");
     fprintf(fasm, "@SP\n");
     fprintf(fasm, "M=M+1\n");
+}
+
+//da controllare
+void decreseStack(FILE *fasm)
+{
+    fprintf(fasm, "@SP\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "M=D\n");
+    fprintf(fasm, "@SP\n");
+    fprintf(fasm, "M=M-1\n");
 }
 
 void error(char c[], int riga)
@@ -91,13 +101,13 @@ void error(char c[], int riga)
 void exec_command(char **command, int riga, FILE *fasm)
 {
 
-    incStack(fasm);
+    increseStack(fasm);
 }
 
 int main(int argc, char **argv)
 {
     FILE *fvm, *fasm;
-    char *command[3], str[128];
+    char command[3][20], str[128];
     int riga = 1;
     
     // esce se non inserisce argomenti
@@ -122,8 +132,23 @@ int main(int argc, char **argv)
     
     while(fgets(str, 128, fvm) != NULL)
     {
-        command = getCommand(str);
-        
+        int y = 0, z = 0;
+        for (int i = 0; i < strlen(str); i++)
+        {
+            if (str[i] != ' ')
+            {
+                command[y][z] = str[i];
+                z++;
+            }
+            else
+            {
+                command[y][z] = '\0';
+                y++;
+                z = 0;
+            }
+        }
+        //command = getCommand(str);
+        printf(fasm, "//writing command = %s\n", command);
         if (command[0][0] != 13 && command[0][0] != '\0')
         {
             fprintf(fasm, "//writing command = %s\n", command);
