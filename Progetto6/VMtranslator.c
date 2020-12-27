@@ -7,6 +7,7 @@ typedef struct count
     int eq;
     int gt;
     int lt;
+    int func;
 } *COUNT;
 
 char command[3][50];
@@ -44,6 +45,7 @@ COUNT inizialize()
     c->eq=0;
     c->gt=0;
     c->lt=0;
+    c->func = 0;
 }
 
 void writeBootstrap(FILE *fasm)
@@ -107,13 +109,13 @@ void push(char *type, char *val, FILE *fasm, int riga)
         fprintf(fasm, "D=A\n");
         increseStack(fasm);
     }
-    else if (strcmp(command[1], (char *)"static") == 0)
+    else if (strcmp(type, (char *)"static") == 0)
     {
         fprintf(fasm, "@%d\n", 16+atoi_custom(val));
         fprintf(fasm, "D=M\n");
         increseStack(fasm);
     }
-    else if (strcmp(command[1], (char *)"local") == 0)
+    else if (strcmp(type, (char *)"local") == 0)
     {
         fprintf(fasm, "@LCL\n");
         fprintf(fasm, "D=M\n");
@@ -123,7 +125,7 @@ void push(char *type, char *val, FILE *fasm, int riga)
         fprintf(fasm, "D=M\n");
         increseStack(fasm);
     }
-    else if (strcmp(command[1], (char *)"argument") == 0)
+    else if (strcmp(type, (char *)"argument") == 0)
     {
         fprintf(fasm, "@ARG\n");
         fprintf(fasm, "D=M\n");
@@ -138,7 +140,7 @@ void push(char *type, char *val, FILE *fasm, int riga)
 
 void pop(char *type, char *val, FILE *fasm, int riga)
 {
-    if (strcmp(command[1], (char *)"static") == 0)
+    if (strcmp(type, (char *)"static") == 0)
     {
         decreseStack(fasm);
         fprintf(fasm, "@SP\n");
@@ -147,7 +149,7 @@ void pop(char *type, char *val, FILE *fasm, int riga)
         fprintf(fasm, "@%d\n", 16+atoi_custom(val));
         fprintf(fasm, "M=D\n");
     }
-    else if (strcmp(command[1], (char *)"local") == 0)
+    else if (strcmp(type, (char *)"local") == 0)
     {
         fprintf(fasm, "@%d\n", atoi_custom(val));
         fprintf(fasm, "D=A\n");
@@ -170,7 +172,7 @@ void pop(char *type, char *val, FILE *fasm, int riga)
         fprintf(fasm, "@LCL\n");
         fprintf(fasm, "M=D\n");
     }
-    else if (strcmp(command[1], (char *)"argument") == 0)
+    else if (strcmp(type, (char *)"argument") == 0)
     {
         fprintf(fasm, "@%d\n", atoi_custom(val));
         fprintf(fasm, "D=A\n");
@@ -363,6 +365,51 @@ void go_to(FILE *fasm, char *name)
     fprintf(fasm, "0;JMP\n");
 }
 
+void call(FILE *fasm, int n, char *name, char *val, int riga)
+{
+    fprintf(fasm, "@%d\n", n);
+    fprintf(fasm, "D=A\n");
+    increseStack(fasm);
+    fprintf(fasm, "@LCL\n");
+    fprintf(fasm, "D=A\n");
+    increseStack(fasm);
+    fprintf(fasm, "@ARG\n");
+    fprintf(fasm, "D=A\n");
+    increseStack(fasm);
+    fprintf(fasm, "@THIS\n");
+    fprintf(fasm, "D=A\n");
+    increseStack(fasm);
+    fprintf(fasm, "@THAT\n");
+    fprintf(fasm, "D=A\n");
+    increseStack(fasm);
+    fprintf(fasm, "@SP\n");
+    fprintf(fasm, "D=A\n");
+    fprintf(fasm, "@LCL\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "M=D\n");
+    fprintf(fasm, "@SP\n");
+    fprintf(fasm, "D=A\n");
+    fprintf(fasm, "@ARG\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "M=D\n");
+    fprintf(fasm, "@5\n");
+    fprintf(fasm, "D=A\n");
+    fprintf(fasm, "@ARG\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "M=M-D\n");
+    fprintf(fasm, "@%s\n", val);
+    fprintf(fasm, "D=A\n");
+    fprintf(fasm, "@ARG\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "M=M-D\n");
+
+    for (int i = 0; i < atoi_custom(val); i++)
+        pop("argument", (char*)48+i, fasm, riga);
+    
+    fprintf(fasm, "@%s\n", name);
+    fprintf(fasm, "0;JMP\n");
+}
+
 void exec_command(int riga, FILE *fasm, COUNT c)
 {
     if (strcmp(command[0], (char *)"push") == 0)
@@ -404,11 +451,14 @@ void exec_command(int riga, FILE *fasm, COUNT c)
         go_to(fasm, command[1]);
     else if (strcmp(command[0], (char *)"function") == 0)
     {
-        /* code */
+        fprintf(fasm, "(%s)\n", command[1]);
+        for (int i = 0; i < atoi_custom(command[2]); i++)
+            push("constant", ((char*)i+48), fasm,  riga);
     }
     else if (strcmp(command[0], (char *)"call") == 0)
     {
-        /* code */
+        c->func++;
+        //call(fasm, c->func, command[1], command[2], riga);
     }
     else if (strcmp(command[0], (char *)"return") == 0)
     {
