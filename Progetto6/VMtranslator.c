@@ -7,10 +7,45 @@ typedef struct count
     int eq;
     int gt;
     int lt;
-    int func;
 } *COUNT;
 
-char command[3][50];
+COUNT inizialize()
+{
+    COUNT c = malloc(sizeof(COUNT));
+    c->eq=0;
+    c->gt=0;
+    c->lt=0;
+}
+
+void getCommand(char *str, char **command)
+{
+    char * p;
+    int i = 0, y = 0, z = 0;
+    for (int k = 0; k < 3; k++)
+    {
+        p = command[k];
+        for (int w = 0; w < 50; w++)
+            p[w] = '\0';
+    }
+    
+    while(str[i] != '\n' && str[i] != '\r' && str[i] != '\0')
+    {
+        p = command[y];
+        if (str[i] == '/' && str[i+1] == '/')
+            break;
+        if (str[i] != ' ')
+        {
+            p[z] = str[i];
+            z++;
+        }
+        else
+        {
+            y++;
+            z = 0;
+        }
+        i++;
+    }
+}
 
 char *getNameFile(char str[])
 {
@@ -37,15 +72,6 @@ char *getNameFile(char str[])
     tmp[++i] = 's';
     tmp[++i] = 'm';
     return tmp;
-}
-
-COUNT inizialize()
-{
-    COUNT c = malloc(sizeof(COUNT));
-    c->eq=0;
-    c->gt=0;
-    c->lt=0;
-    c->func = 0;
 }
 
 void writeBootstrap(FILE *fasm)
@@ -357,113 +383,180 @@ void if_goto(FILE *fasm, char *name)
 
 void go_to(FILE *fasm, char *name)
 {
-    decreseStack(fasm);
-    fprintf(fasm, "@SP\n");
-    fprintf(fasm, "A=M\n");
-    fprintf(fasm, "D=M\n");
     fprintf(fasm, "@%s\n", name);
     fprintf(fasm, "0;JMP\n");
 }
 
-void call(FILE *fasm, int n, char *name, char *val, int riga)
+void call(FILE *fasm, int n, char *name, char *val)
 {
-    fprintf(fasm, "@%d\n", n);
+    //metto il numero della riga dopo nello stack
+    fprintf(fasm, "@RETURNCALL%d\n", n);
     fprintf(fasm, "D=A\n");
     increseStack(fasm);
+    //metto il numero che è in LCL nello stack
     fprintf(fasm, "@LCL\n");
+    fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=A\n");
     increseStack(fasm);
+    //metto il numero che è in ARG nello stack
     fprintf(fasm, "@ARG\n");
+    fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=A\n");
     increseStack(fasm);
+    //metto il numero che è in THIS nello stack
     fprintf(fasm, "@THIS\n");
+    fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=A\n");
     increseStack(fasm);
+    //metto il numero che è in THAT nello stack
     fprintf(fasm, "@THAT\n");
+    fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=A\n");
     increseStack(fasm);
+    //aggiorno LCL
     fprintf(fasm, "@SP\n");
+    fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=A\n");
     fprintf(fasm, "@LCL\n");
-    fprintf(fasm, "A=M\n");
     fprintf(fasm, "M=D\n");
+    //aggiorno ARG
     fprintf(fasm, "@SP\n");
+    fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=A\n");
     fprintf(fasm, "@ARG\n");
-    fprintf(fasm, "A=M\n");
     fprintf(fasm, "M=D\n");
     fprintf(fasm, "@5\n");
     fprintf(fasm, "D=A\n");
     fprintf(fasm, "@ARG\n");
-    fprintf(fasm, "A=M\n");
     fprintf(fasm, "M=M-D\n");
     fprintf(fasm, "@%s\n", val);
     fprintf(fasm, "D=A\n");
     fprintf(fasm, "@ARG\n");
-    fprintf(fasm, "A=M\n");
     fprintf(fasm, "M=M-D\n");
-
-    for (int i = 0; i < atoi_custom(val); i++)
-        pop("argument", (char*)48+i, fasm, riga);
-    
     fprintf(fasm, "@%s\n", name);
+    fprintf(fasm, "0;JMP\n");
+    fprintf(fasm, "(RETURNCALL%d)\n", n);
+}
+
+void returncall(FILE *fasm)
+{
+    
+    fprintf(fasm, "@LCL\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "D=A\n");
+    fprintf(fasm, "@R13\n");
+    fprintf(fasm, "M=D\n");
+    
+    for (int i = 0; i < 8; i++)
+        decreseStack(fasm);
+    fprintf(fasm, "@SP\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "D=M\n");
+    fprintf(fasm, "@R14\n");
+    fprintf(fasm, "M=D\n");
+
+    fprintf(fasm, "@SP\n");
+    fprintf(fasm, "M=M+1\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "D=M\n");
+    fprintf(fasm, "@LCL\n");
+    fprintf(fasm, "M=D\n");
+
+    fprintf(fasm, "@SP\n");
+    fprintf(fasm, "M=M+1\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "D=M\n");
+    fprintf(fasm, "@ARG\n");
+    fprintf(fasm, "M=D\n");
+
+    fprintf(fasm, "@SP\n");
+    fprintf(fasm, "M=M+1\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "D=M\n");
+    fprintf(fasm, "@THIS\n");
+    fprintf(fasm, "M=D\n");
+
+    fprintf(fasm, "@SP\n");
+    fprintf(fasm, "M=M+1\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "D=M\n");
+    fprintf(fasm, "@THAT\n");
+    fprintf(fasm, "M=D\n");
+    
+    for (int i = 0; i < 3; i++)
+    {
+        fprintf(fasm, "@SP\n");
+        fprintf(fasm, "M=M+1\n");
+    }
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "D=M\n");
+    for (int i = 0; i < 9; i++)
+        decreseStack(fasm);
+    increseStack(fasm);
+
+    //sbagliato su più chiamate della funzione
+    fprintf(fasm, "@R14\n");
+    fprintf(fasm, "A=M\n");
     fprintf(fasm, "0;JMP\n");
 }
 
-void exec_command(int riga, FILE *fasm, COUNT c)
+void writeComment(FILE *fasm, char **command)
 {
-    if (strcmp(command[0], (char *)"push") == 0)
-        push(command[1], command[2], fasm, riga);
-    else if (strcmp(command[0], (char *)"pop") == 0)
-        pop(command[1], command[2], fasm, riga);
-    else if (strcmp(command[0], (char *)"add") == 0)
+    fprintf(fasm, "//");
+    for (int i = 0; i < 3; i++)
+        fprintf(fasm, "%s ", command[i]);
+    fprintf(fasm, "\n");
+}
+
+void exec_command(char *command, char *type, char *val, int riga, FILE *fasm, COUNT c)
+{
+    if (strcmp(command, (char *)"push") == 0)
+        push(type, val, fasm, riga);
+    else if (strcmp(command, (char *)"pop") == 0)
+        pop(type, val, fasm, riga);
+    else if (strcmp(command, (char *)"add") == 0)
         add(fasm);
-    else if (strcmp(command[0], (char *)"sub") == 0)
+    else if (strcmp(command, (char *)"sub") == 0)
         sub(fasm);
-    else if (strcmp(command[0], (char *)"neg") == 0)
+    else if (strcmp(command, (char *)"neg") == 0)
         neg(fasm, riga);
-    else if (strcmp(command[0], (char *)"eq") == 0)
+    else if (strcmp(command, (char *)"eq") == 0)
     {
         eq(fasm, riga, c->eq);
         c->eq++;
     }
-    else if (strcmp(command[0], (char *)"gt") == 0)
+    else if (strcmp(command, (char *)"gt") == 0)
     {
         gt(fasm, riga, c->gt);
         c->gt++;
     }
-    else if (strcmp(command[0], (char *)"lt") == 0)
+    else if (strcmp(command, (char *)"lt") == 0)
     {
         lt(fasm, riga, c->lt);
         c->lt++;
     }
-    else if (strcmp(command[0], (char *)"and") == 0)
+    else if (strcmp(command, (char *)"and") == 0)
         and(fasm, riga);
-    else if (strcmp(command[0], (char *)"or") == 0)
+    else if (strcmp(command, (char *)"or") == 0)
         or(fasm, riga);
-    else if (strcmp(command[0], (char *)"not") == 0)
+    else if (strcmp(command, (char *)"not") == 0)
         not(fasm, riga);
-    else if (strcmp(command[0], (char *)"label") == 0)
-        fprintf(fasm, "(%s)\n", command[1]);
-    else if (strcmp(command[0], (char *)"if-goto") == 0)
-        if_goto(fasm, command[1]);
-    else if (strcmp(command[0], (char *)"goto") == 0)
-        go_to(fasm, command[1]);
-    else if (strcmp(command[0], (char *)"function") == 0)
+    else if (strcmp(command, (char *)"label") == 0)
+        fprintf(fasm, "(%s)\n", type);
+    else if (strcmp(command, (char *)"if-goto") == 0)
+        if_goto(fasm, type);
+    else if (strcmp(command, (char *)"goto") == 0)
+        go_to(fasm, type);
+    else if (strcmp(command, (char *)"function") == 0)
     {
-        fprintf(fasm, "(%s)\n", command[1]);
-        for (int i = 0; i < atoi_custom(command[2]); i++)
-            push("constant", ((char*)i+48), fasm,  riga);
+        fprintf(fasm, "(%s)\n", type);
+        for (int i = 0; i < atoi_custom(val); i++)
+            push("constant", "0", fasm,  riga); 
     }
-    else if (strcmp(command[0], (char *)"call") == 0)
-    {
-        c->func++;
-        //call(fasm, c->func, command[1], command[2], riga);
-    }
-    else if (strcmp(command[0], (char *)"return") == 0)
-    {
-        /* code */
-    }
+    else if (strcmp(command, (char *)"call") == 0)
+        call(fasm, riga+1, type, val);
+    else if (strcmp(command, (char *)"return") == 0)
+        returncall(fasm);
     else
         error(riga);
 }
@@ -472,10 +565,13 @@ int main(int argc, char **argv)
 {
     FILE *fvm, *fasm;
     char str[128];
-    int riga = 1, i, y, z;
+    
+    char c0[50], c1[50], c2[50];
+    char *command[] = {c0, c1, c2};
+
+    int riga = 1;
     COUNT c = inizialize();
     
-    // esce se non inserisce argomenti
     if(argc < 2)
     {
         printf("Errore: inserire un argomento\n");
@@ -483,13 +579,13 @@ int main(int argc, char **argv)
     }
 
     char * namefile = getNameFile(argv[1]);
-    // esce se l'argomento inserito non è un file vm
+    
     if(namefile == NULL)
     {
         printf("Errore: argomento non valido\n");
-        return(0);
+        return(-1);
     }
-    
+
     fvm = fopen(argv[1], "r");
     fasm = fopen(namefile, "w");
 
@@ -497,39 +593,13 @@ int main(int argc, char **argv)
     
     while(fgets(str, 128, fvm) != NULL)
     {
-        //prendo il comando come un array con 3 parole lungo al massimo 50
-        i = 0; y = 0; z = 0;
-        for (int k = 0; k < 3; k++)
-            for (int w = 0; w < 50; w++)
-                command[k][w] = '\0';
-        
-        while(str[i] != '\n' && str[i] != '\r' && str[i] != '\0')
-        {
-            if (str[i] == '/' && str[i+1] == '/')
-                break;
-            if (str[i] != ' ')
-            {
-                command[y][z] = str[i];
-                z++;
-            }
-            else
-            {
-                y++;
-                z = 0;
-            }
-            i++;
-        }
-
+        getCommand(str, command);
         if (command[0][0] != '\0')
         {
-            fprintf(fasm, "//");
-            for (int i = 0; i < 3; i++)
-                fprintf(fasm, "%s ", command[i]);
-            fprintf(fasm, "\n");
-            exec_command(riga, fasm, c);
+            writeComment(fasm, command);
+            exec_command(command[0], command[1], command[2], riga, fasm, c);
+            riga++;
         }
-
-        riga++;
     }
 
     fclose(fvm);
