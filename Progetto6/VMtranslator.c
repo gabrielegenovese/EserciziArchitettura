@@ -389,26 +389,26 @@ void go_to(FILE *fasm, char *name)
 
 void call(FILE *fasm, int n, char *name, char *val)
 {
-    //metto il numero della riga dopo nello stack
+    //push return address
     fprintf(fasm, "@RETURNCALL%d\n", n);
     fprintf(fasm, "D=A\n");
     increseStack(fasm);
-    //metto il numero che è in LCL nello stack
+    //push LCL
     fprintf(fasm, "@LCL\n");
     fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=A\n");
     increseStack(fasm);
-    //metto il numero che è in ARG nello stack
+    //push ARG
     fprintf(fasm, "@ARG\n");
     fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=A\n");
     increseStack(fasm);
-    //metto il numero che è in THIS nello stack
+    //push THIS
     fprintf(fasm, "@THIS\n");
     fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=A\n");
     increseStack(fasm);
-    //metto il numero che è in THAT nello stack
+    //push THAT
     fprintf(fasm, "@THAT\n");
     fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=A\n");
@@ -440,61 +440,68 @@ void call(FILE *fasm, int n, char *name, char *val)
 
 void returncall(FILE *fasm)
 {
-    
+    //FRAME (R13) = LCL
     fprintf(fasm, "@LCL\n");
     fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=A\n");
     fprintf(fasm, "@R13\n");
     fprintf(fasm, "M=D\n");
     
-    for (int i = 0; i < 8; i++)
-        decreseStack(fasm);
-    fprintf(fasm, "@SP\n");
-    fprintf(fasm, "A=M\n");
+    //RET (R14) = *(FRAME-5)
+    fprintf(fasm, "@5\n");
+    fprintf(fasm, "D=D-A\n");
+    fprintf(fasm, "A=D\n");
     fprintf(fasm, "D=M\n");
     fprintf(fasm, "@R14\n");
     fprintf(fasm, "M=D\n");
 
-    fprintf(fasm, "@SP\n");
-    fprintf(fasm, "M=M+1\n");
-    fprintf(fasm, "A=M\n");
-    fprintf(fasm, "D=M\n");
+    //*ARG = pop()
     fprintf(fasm, "@LCL\n");
-    fprintf(fasm, "M=D\n");
-
-    fprintf(fasm, "@SP\n");
-    fprintf(fasm, "M=M+1\n");
     fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=M\n");
     fprintf(fasm, "@ARG\n");
+    fprintf(fasm, "A=M\n");
     fprintf(fasm, "M=D\n");
 
+    //SP = ARG+1
+    fprintf(fasm, "@ARG\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "D=A+1\n");
     fprintf(fasm, "@SP\n");
-    fprintf(fasm, "M=M+1\n");
+    fprintf(fasm, "M=D\n");
+
+    //THAT = *(FRAME-1)
+    fprintf(fasm, "@R13\n");
+    fprintf(fasm, "M=M-1\n");
+    fprintf(fasm, "A=M\n");
+    fprintf(fasm, "D=M\n");
+    fprintf(fasm, "@THAT\n");
+    fprintf(fasm, "M=D\n");
+
+    //THIS = *(FRAME-2)
+    fprintf(fasm, "@R13\n");
+    fprintf(fasm, "M=M-1\n");
     fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=M\n");
     fprintf(fasm, "@THIS\n");
     fprintf(fasm, "M=D\n");
 
-    fprintf(fasm, "@SP\n");
-    fprintf(fasm, "M=M+1\n");
+    //ARG = *(FRAME-3)
+    fprintf(fasm, "@R13\n");
+    fprintf(fasm, "M=M-1\n");
     fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=M\n");
-    fprintf(fasm, "@THAT\n");
+    fprintf(fasm, "@ARG\n");
     fprintf(fasm, "M=D\n");
-    
-    for (int i = 0; i < 3; i++)
-    {
-        fprintf(fasm, "@SP\n");
-        fprintf(fasm, "M=M+1\n");
-    }
+
+    //LCL = *(FRAME-4)
+    fprintf(fasm, "@R13\n");
+    fprintf(fasm, "M=M-1\n");
     fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=M\n");
-    for (int i = 0; i < 9; i++)
-        decreseStack(fasm);
-    increseStack(fasm);
+    fprintf(fasm, "@LCL\n");
+    fprintf(fasm, "M=D\n");
 
-    //sbagliato su più chiamate della funzione
     fprintf(fasm, "@R14\n");
     fprintf(fasm, "A=M\n");
     fprintf(fasm, "0;JMP\n");

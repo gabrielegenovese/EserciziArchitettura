@@ -5,16 +5,10 @@
 
 // Performs a simple calculation and returns the result.
 // Add the line below to test in VMEmulator
- 
-push constant 10
-push constant 20
-call SimpleFunction.test 2
-label END
-goto END
 
 function SimpleFunction.test 2
-push local 0
-push local 1
+//push local 0
+//push local 1
 add
 not
 push argument 0
