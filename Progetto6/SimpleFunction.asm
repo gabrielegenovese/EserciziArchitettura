@@ -19,6 +19,30 @@ A=M
 M=D
 @SP
 M=M+1
+//push local 0 
+@LCL
+D=M
+@0
+D=D+A
+A=D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+//push local 1 
+@LCL
+D=M
+@1
+D=D+A
+A=D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
 //add   
 @SP
 M=M-1
@@ -116,7 +140,9 @@ A=D
 D=M
 @R14
 M=D
-@LCL
+@SP
+M=M-1
+@SP
 A=M
 D=M
 @ARG

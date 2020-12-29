@@ -9,7 +9,7 @@ typedef struct count
     int lt;
 } *COUNT;
 
-COUNT inizialize()
+COUNT inizializza()
 {
     COUNT c = malloc(sizeof(COUNT));
     c->eq=0;
@@ -456,7 +456,8 @@ void returncall(FILE *fasm)
     fprintf(fasm, "M=D\n");
 
     //*ARG = pop()
-    fprintf(fasm, "@LCL\n");
+    decreseStack(fasm);
+    fprintf(fasm, "@SP\n");
     fprintf(fasm, "A=M\n");
     fprintf(fasm, "D=M\n");
     fprintf(fasm, "@ARG\n");
@@ -577,7 +578,7 @@ int main(int argc, char **argv)
     char *command[] = {c0, c1, c2};
 
     int riga = 1;
-    COUNT c = inizialize();
+    COUNT c = inizializza();
     
     if(argc < 2)
     {

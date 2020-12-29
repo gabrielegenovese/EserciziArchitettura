@@ -31,7 +31,7 @@ M=M-1
 A=M
 M=M-D
 D=M
-@EQ10
+@EQ3
 D;JEQ
 @0
 D=A
@@ -40,9 +40,9 @@ A=M
 M=D
 @SP
 M=M+1
-@END_EQ10
+@END_EQ3
 0;JMP
-(EQ10)
+(EQ3)
 @0
 D=A
 D=D-1
@@ -51,7 +51,7 @@ A=M
 M=D
 @SP
 M=M+1
-(END_EQ10)
+(END_EQ3)
 //push constant 17 
 @17
 D=A
@@ -80,7 +80,7 @@ M=M-1
 A=M
 M=M-D
 D=M
-@EQ13
+@EQ6
 D;JEQ
 @0
 D=A
@@ -89,9 +89,9 @@ A=M
 M=D
 @SP
 M=M+1
-@END_EQ13
+@END_EQ6
 0;JMP
-(EQ13)
+(EQ6)
 @0
 D=A
 D=D-1
@@ -100,7 +100,7 @@ A=M
 M=D
 @SP
 M=M+1
-(END_EQ13)
+(END_EQ6)
 //push constant 16 
 @16
 D=A
@@ -129,7 +129,7 @@ M=M-1
 A=M
 M=M-D
 D=M
-@EQ16
+@EQ9
 D;JEQ
 @0
 D=A
@@ -138,9 +138,9 @@ A=M
 M=D
 @SP
 M=M+1
-@END_EQ16
+@END_EQ9
 0;JMP
-(EQ16)
+(EQ9)
 @0
 D=A
 D=D-1
@@ -149,7 +149,7 @@ A=M
 M=D
 @SP
 M=M+1
-(END_EQ16)
+(END_EQ9)
 //push constant 892 
 @892
 D=A
@@ -178,7 +178,7 @@ M=M-1
 A=M
 M=M-D
 D=M
-@LT19
+@LT12
 D;JLT
 @0
 D=A
@@ -187,9 +187,9 @@ A=M
 M=D
 @SP
 M=M+1
-@END_LT19
+@END_LT12
 0;JMP
-(LT19)
+(LT12)
 @0
 D=A
 D=D-1
@@ -198,7 +198,7 @@ A=M
 M=D
 @SP
 M=M+1
-(END_LT19)
+(END_LT12)
 //push constant 891 
 @891
 D=A
@@ -227,7 +227,7 @@ M=M-1
 A=M
 M=M-D
 D=M
-@LT22
+@LT15
 D;JLT
 @0
 D=A
@@ -236,9 +236,9 @@ A=M
 M=D
 @SP
 M=M+1
-@END_LT22
+@END_LT15
 0;JMP
-(LT22)
+(LT15)
 @0
 D=A
 D=D-1
@@ -247,7 +247,7 @@ A=M
 M=D
 @SP
 M=M+1
-(END_LT22)
+(END_LT15)
 //push constant 891 
 @891
 D=A
@@ -276,7 +276,7 @@ M=M-1
 A=M
 M=M-D
 D=M
-@LT25
+@LT18
 D;JLT
 @0
 D=A
@@ -285,9 +285,9 @@ A=M
 M=D
 @SP
 M=M+1
-@END_LT25
+@END_LT18
 0;JMP
-(LT25)
+(LT18)
 @0
 D=A
 D=D-1
@@ -296,7 +296,7 @@ A=M
 M=D
 @SP
 M=M+1
-(END_LT25)
+(END_LT18)
 //push constant 32767 
 @32767
 D=A
@@ -325,7 +325,7 @@ M=M-1
 A=M
 M=M-D
 D=M
-@GT28
+@GT21
 D;JGT
 @0
 D=A
@@ -334,9 +334,9 @@ A=M
 M=D
 @SP
 M=M+1
-@END_GT28
+@END_GT21
 0;JMP
-(GT28)
+(GT21)
 @0
 D=A
 D=D-1
@@ -345,7 +345,7 @@ A=M
 M=D
 @SP
 M=M+1
-(END_GT28)
+(END_GT21)
 //push constant 32766 
 @32766
 D=A
@@ -374,7 +374,7 @@ M=M-1
 A=M
 M=M-D
 D=M
-@GT31
+@GT24
 D;JGT
 @0
 D=A
@@ -383,9 +383,9 @@ A=M
 M=D
 @SP
 M=M+1
-@END_GT31
+@END_GT24
 0;JMP
-(GT31)
+(GT24)
 @0
 D=A
 D=D-1
@@ -394,7 +394,7 @@ A=M
 M=D
 @SP
 M=M+1
-(END_GT31)
+(END_GT24)
 //push constant 32766 
 @32766
 D=A
@@ -423,7 +423,7 @@ M=M-1
 A=M
 M=M-D
 D=M
-@GT34
+@GT27
 D;JGT
 @0
 D=A
@@ -432,9 +432,9 @@ A=M
 M=D
 @SP
 M=M+1
-@END_GT34
+@END_GT27
 0;JMP
-(GT34)
+(GT27)
 @0
 D=A
 D=D-1
@@ -443,7 +443,7 @@ A=M
 M=D
 @SP
 M=M+1
-(END_GT34)
+(END_GT27)
 //push constant 57 
 @57
 D=A

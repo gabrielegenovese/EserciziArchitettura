@@ -169,7 +169,9 @@ A=D
 D=M
 @R14
 M=D
-@LCL
+@SP
+M=M-1
+@SP
 A=M
 D=M
 @ARG
@@ -433,7 +435,9 @@ A=D
 D=M
 @R14
 M=D
-@LCL
+@SP
+M=M-1
+@SP
 A=M
 D=M
 @ARG
